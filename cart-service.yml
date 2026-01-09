@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pbl7-cart-service-app
+  labels:
+    app: pbl7-cart-service-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pbl7-cart-service-app
+  template:
+    metadata:
+      labels:
+        app: pbl7-cart-service-app
+    spec:
+      containers:
+        - name: cart-service-app
+          image: lethanhviet0203/pbl7-cart-service:0.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/pbl7_cart_service?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false"
+            - name: SPRING_DATASOURCE_DRIVERCLASSNAME
+              value: "com.mysql.cj.jdbc.Driver"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: password
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "update"
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              value: "org.hibernate.dialect.MySQLDialect"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pbl7-cart-service-svc
+spec:
+  selector:
+    app: pbl7-cart-service-app
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8081

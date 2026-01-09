@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pbl7-notification-service-app
+  labels:
+    app: pbl7-notification-service-app
+# env:
+#   - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+#     value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pbl7-notification-service-app
+  template:
+    metadata:
+      labels:
+        app: pbl7-notification-service-app
+    spec:
+      containers:
+        - name: pbl7-notification-service-app
+          image: lethanhviet0203/pbl7-notification-service:0.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_DATA_MONGODB_URI
+              value: "mongodb://root:viet12345@mongodb-service:27017/notification-service?authSource=admin"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+            - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+              value: "false"
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pbl7-notification-service-svc
+spec:
+  selector:
+    app: pbl7-notification-service-app
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8082

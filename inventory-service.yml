@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pbl7-inventory-service-app
+  labels:
+    app: pbl7-inventory-service-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pbl7-inventory-service-app
+  template:
+    metadata:
+      labels:
+        app: pbl7-inventory-service-app
+    spec:
+      containers:
+        - name: pbl7-inventory-service-app
+          image: lethanhviet0203/pbl7-inventory-service:0.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8086
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/pbl7_inventory_service?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false"
+            - name: SPRING_DATASOURCE_DRIVERCLASSNAME
+              value: "com.mysql.cj.jdbc.Driver"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: password
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "update"
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              value: "org.hibernate.dialect.MySQLDialect"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+            - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+              value: "false"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pbl7-inventory-service-svc
+spec:
+  selector:
+    app: pbl7-inventory-service-app
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8086

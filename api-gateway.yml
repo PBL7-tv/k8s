@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pbl7-api-gateway-app
+  labels:
+    app: pbl7-api-gateway-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pbl7-api-gateway-app
+  template:
+    metadata:
+      labels:
+        app: pbl7-api-gateway-app
+    spec:
+      containers:
+        - name: api-gateway-app
+          image: lethanhviet0203/pbl7-api-gateway:0.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8888
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pbl7-api-gateway-svc
+spec:
+  selector:
+    app: pbl7-api-gateway-app
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8888
+      protocol: TCP

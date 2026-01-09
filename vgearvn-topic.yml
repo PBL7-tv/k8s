@@ -1,0 +1,11 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: vgearvn # <-- tên resource trong Kubernetes, nên dùng chữ thường
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  topicName: VGearVN # <-- tên topic thực tế trong Kafka, phân biệt hoa/thường
+  partitions: 1
+  replicas: 1

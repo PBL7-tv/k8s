@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: payment-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - host: api.yourdomain.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: /payment(/|$)(.*)
+            backend:
+              service:
+                name: pbl7-payment-service-svc
+                port:
+                  number: 8087
